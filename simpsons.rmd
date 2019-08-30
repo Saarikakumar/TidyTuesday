@@ -1,0 +1,51 @@
+---
+title: "Untitled"
+output: html_document
+---
+
+
+```{r}
+library(tidyverse)
+simpsons <- readr::read_delim("https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2019/2019-08-27/simpsons-guests.csv", delim = "|", quote = "")
+head(simpsons, 50)
+```
+
+```{r}
+guest_star_count <- simpsons  %>%  count(guest_star, sort = TRUE) # get count of appearances of each guest star sorted from highest to lowest 
+guest_star_count
+top_ten_guests <- head(guest_star_count,10) #get first 10 rows in data frame (sorted from highest to lowest)
+top_ten_guests
+ggplot(top_ten_guests) + geom_bar(aes(x = guest_star, y = n), stat="identity", fill = "#b096d9") + ggtitle("Top 10 most frequently appearing guest stars") + labs(y = "Count", x = "guest_star") + # add x and y labels
+  theme(axis.text.x  = element_text(angle=12, size=7.5)) #angle x labels
+```
+
+```{r}
+#convert seasons column to be numeric
+simpsons$season <- as.numeric(simpsons$season)
+#get number of unique guest stars by season
+guest_star_season_count <- simpsons %>% 
+   group_by(season) %>%
+  summarize(n_unique = n_distinct(guest_star))
+guest_star_season_count
+
+#plot nuber of unique guest stars by season
+ggplot(guest_star_season_count) +geom_bar(aes(x = season, y = n_unique), stat = "identity") + ylim(0, 65) + ggtitle("number of guest stars per season") + labs(y = "Count", x = "season") 
+```
+
+```{r}
+simpsons$season <- as.numeric(simpsons$season)
+
+# get counts of guest stars by episode (number) 
+guest_star_count_ep <- simpsons %>% 
+  count(season, number) 
+guest_star_count_ep
+
+attach(guest_star_count_ep)
+#calculate mean number of guest stars by season using aggregate
+mean_guest_star_ep <- aggregate(guest_star_count_ep, list(season), mean) 
+mean_guest_star_ep
+
+#plot mean number of guest stars per episode by season
+ggplot(mean_guest_star_ep) + geom_line(aes(x = season, y = n)) + ylim(0, 4) + ggtitle("mean number of guest stars per episode by season") + labs(y = "Guests per episode", x = "season") 
+```
+
