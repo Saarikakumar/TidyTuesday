@@ -1,6 +1,9 @@
 ---
-title: "Untitled"
-output: html_document
+title: "simpsons.rmd"
+output:
+  html_document: default
+  pdf_document: default
+  word_document: default
 ---
 
 
@@ -33,19 +36,16 @@ ggplot(guest_star_season_count) +geom_bar(aes(x = season, y = n_unique), stat = 
 ```
 
 ```{r}
-simpsons$season <- as.numeric(simpsons$season)
-
 # get counts of guest stars by episode (number) 
 guest_star_count_ep <- simpsons %>% 
   count(season, number) 
 guest_star_count_ep
 
 attach(guest_star_count_ep)
-#calculate mean number of guest stars by season using aggregate
-mean_guest_star_ep <- aggregate(guest_star_count_ep, list(season), mean) 
+#calculate mean number of guest stars by season using aggregate for every column except the number (second to last) column
+mean_guest_star_ep <- aggregate(guest_star_count_ep[-2], by = list(season), FUN=mean) 
 mean_guest_star_ep
 
 #plot mean number of guest stars per episode by season
 ggplot(mean_guest_star_ep) + geom_line(aes(x = season, y = n)) + ylim(0, 4) + ggtitle("mean number of guest stars per episode by season") + labs(y = "Guests per episode", x = "season") 
 ```
-
