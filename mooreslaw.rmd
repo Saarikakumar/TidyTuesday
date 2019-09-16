@@ -1,0 +1,28 @@
+---
+title: "Moores Law"
+output: html_document
+params:
+  printcode: FALSE
+---
+```{r include=FALSE}
+knitr::opts_chunk$set(fig.width=12, fig.height=8, fig.path='Figs/',
+                    echo=params$printcode, warning=params$printcode, message=params$printcode)
+```
+
+```{r}
+library(tidyverse)
+cpu <- readr::read_csv("https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2019/2019-09-03/cpu.csv")
+
+gpu <- readr::read_csv("https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2019/2019-09-03/gpu.csv")
+
+ram <- readr::read_csv("https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2019/2019-09-03/ram.csv")
+```
+
+```{r plot of CPU transistors per year}
+# creates a plot of number of transistors per year using a log scale and points are colored by area with smaller chips white and larger chips purple.
+plt <-ggplot(cpu) +geom_point(aes(x = date_of_introduction, y = transistor_count, color = area)) + ggtitle("Number of CPU transitors per year") + labs(y = "number of transistors", x = "year") + xlim(1970, 2020) + scale_y_log10() + scale_color_gradient2(limits = c(5, 850))
+plt
+```
+
+
+

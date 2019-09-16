@@ -1,0 +1,58 @@
+---
+title: "Aumusement Park Injuries"
+output: html_document
+params:
+  printcode: FALSE
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(fig.path='Figs/',
+                    echo=params$printcode, warning=params$printcode, message=params$printcode)
+```
+
+```{r}
+library(ggplot2)
+library(dplyr)
+tx_injuries <- readr::read_csv("https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2019/2019-09-10/tx_injuries.csv")
+
+safer_parks <- readr::read_csv("https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2019/2019-09-10/saferparks.csv")
+
+valid_date <- filter (tx_injuries, injury_date !="n/a" & injury_date !="#########")
+char_date <- filter(valid_date, nchar(injury_date) != 5)
+
+serial <- filter(valid_date, nchar(injury_date) == 5)
+serial$injury_date <- as.numeric(serial$injury_date)
+library(janitor)
+serial$injury_date <- excel_numeric_to_date(serial$injury_date, include_time = FALSE)
+
+char_date$injury_date<-as.Date(char_date$injury_date,"%m/%d/%Y")
+
+format_date <- rbind(char_date, serial)
+
+format_date$year <- as.numeric(format(format_date$injury_date,'%Y'))
+
+ggplot(data = format_date, aes(x=year)) + geom_bar(stat="count", fill = "#b096d9") + ggtitle("Number of injuries per year") + labs(y = "Number of injuries", x = "year")
+
+```
+
+```{r}
+text_df <- tibble(line = 1:542, text = tx_injuries$body_part)
+library(tidytext)
+#take each line of text and break into individual tokens (default words)
+text_df <- text_df %>%
+  unnest_tokens(word, text)
+#remove stop words
+text_df<- text_df %>%
+  anti_join(stop_words)
+
+text_df<- text_df %>%
+  filter(word != "left" & word != "lower")
+
+#count occurrences of words
+word_count <- text_df %>%
+  count(word, sort = TRUE) 
+top_ten <- word_count[1:10,]
+
+ggplot(top_ten, aes(x=word, y = n)) + geom_bar(stat="identity") + ggtitle("Top ten body parts injuried") + labs(y = "Number of injuries", x = "Body part")
+```
+
